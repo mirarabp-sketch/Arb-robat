@@ -1,60 +1,46 @@
 require("dotenv").config();
-const apiRoutes = require("./apiRoutes");
+
 const express = require("express");
 const cors = require("cors");
 
-const config = require("./config");
-const { getPrices } = require("./scanner");
-const { findArbitrage } = require("./arbitrage");
-const { saveTrade, getTrades } = require("./history");
-const { executeTrade } = require("./trader");
+const apiRoutes = require("./apiRoutes");
+const { startBot } = require("./botStatus");
 
 const app = express();
 
+
 app.use(cors());
 app.use(express.json());
-app.use("/api", apiRoutes);
-const dashboardApi = require("./dashboardApi");
 
-app.use("/api", dashboardApi);
+
+// API Routes
+app.use("/api", apiRoutes);
+
+
+// Main page
 app.get("/", (req, res) => {
+
   res.json({
     bot: "DEGEN Arbitrage Bot",
     network: "Base",
     status: "Running"
   });
+
 });
 
-app.get("/history", (req, res) => {
-  res.json(getTrades());
-});
 
-async function scan() {
-  const prices = await getPrices();
-  const opportunity = findArbitrage(prices);
+// Start bot status
+startBot();
 
-  if (
-    opportunity &&
-    Number(opportunity.profitPercent) >= config.minProfitPercent
-  ) {
-    const result = await executeTrade(opportunity);
 
-    if (result.success) {
-      saveTrade({
-        ...opportunity,
-        txHash: result.txHash
-      });
-    }
-  }
-}
+const PORT =
+  process.env.PORT || 3000;
 
-setInterval(scan, config.updateInterval);
-
-const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Bot started on port ${PORT}`);
+
+  console.log(
+    `Bot started on port ${PORT}`
+  );
+
 });
-require("./botRunner");
-require("./mainBot");
-require("./monitor");
