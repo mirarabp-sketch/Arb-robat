@@ -1,20 +1,36 @@
 const { scanBase } = require("./baseScanner");
+const { getAerodromeQuote } = require("./aerodromeScanner");
+const { ethers } = require("ethers");
 
 async function getPrices() {
-  const prices = [];
+    const prices = [];
 
-  const uniswapPrice = await scanBase();
+    try {
+        const uni = await scanBase();
 
-  if (uniswapPrice) {
-    prices.push({
-      exchange: "Uniswap",
-      price: Number(uniswapPrice)
-    });
-  }
+        if (uni) {
+            prices.push({
+                exchange: "Uniswap",
+                price: Number(ethers.formatUnits(uni, 6))
+            });
+        }
 
-  return prices;
+        const aero = await getAerodromeQuote();
+
+        if (aero) {
+            prices.push({
+                exchange: "Aerodrome",
+                price: Number(ethers.formatUnits(aero, 6))
+            });
+        }
+
+        return prices;
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
 }
 
 module.exports = {
-  getPrices
+    getPrices
 };
