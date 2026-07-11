@@ -1,30 +1,35 @@
 const { ethers } = require("ethers");
-const { getPrice } = require("./uniswap");
-const contracts = require("./contracts");
+const { provider } = require("./wallet");
 
-async function scanBase() {
-    try {
-        const amountIn = ethers.parseUnits("1", 18);
+const QUOTER_V2 = "0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a";
 
-        const path = [
-            contracts.DEGEN,
-            contracts.USDC
-        ];
+const quoterAbi = [
+  "function quoteExactInputSingle((address tokenIn,address tokenOut,uint256 amountIn,uint24 fee,uint160 sqrtPriceLimitX96)) external returns (uint256 amountOut,uint160 sqrtPriceX96After,uint32 initializedTicksCrossed,uint256 gasEstimate)"
+];
 
-        const result = await getPrice(amountIn, path);
+const quoter = new ethers.Contract(
+  QUOTER_V2,
+  quoterAbi,
+  provider
+);
 
-        if (result) {
-            console.log("DEGEN Price:", result[result.length - 1].toString());
-            return result[result.length - 1];
-        }
+async function getQuote(tokenIn, tokenOut, amountIn, fee = 3000) {
+  try {
+    const result = await quoter.quoteExactInputSingle({
+      tokenIn,
+      tokenOut,
+      amountIn,
+      fee,
+      sqrtPriceLimitX96: 0
+    });
 
-        return null;
-    } catch (err) {
-        console.error(err);
-        return null;
-    }
+    return result.amountOut;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
 
 module.exports = {
-    scanBase
+  getQuote
 };
