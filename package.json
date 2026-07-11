@@ -4,7 +4,8 @@
   "description": "DEGEN Arbitrage Bot on Base",
   "main": "backend/index.js",
   "scripts": {
-    "start": "node backend/index.js"
+    "start": "node backend/index.js",
+    "test:connection": "node backend/testConnection.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
