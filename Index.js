@@ -1,23 +1,32 @@
-require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
 
-const express = require("express");
-const cors = require("cors");
+const filePath = path.join(__dirname, "../database/trades.json");
 
-const app = express();
+function saveTrade(trade) {
+  let trades = [];
 
-app.use(cors());
-app.use(express.json());
+  if (fs.existsSync(filePath)) {
+    trades = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  }
 
-const PORT = process.env.PORT || 3000;
+  trades.push({
+    time: new Date().toISOString(),
+    ...trade
+  });
 
-app.get("/", (req, res) => {
-    res.json({
-        bot: "DEGEN Arbitrage Bot",
-        network: "Base",
-        status: "Running"
-    });
-});
+  fs.writeFileSync(filePath, JSON.stringify(trades, null, 2));
+}
 
-app.listen(PORT, () => {
-    console.log(`Bot started on port ${PORT}`);
-});
+function getTrades() {
+  if (!fs.existsSync(filePath)) {
+    return [];
+  }
+
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+module.exports = {
+  saveTrade,
+  getTrades
+};
