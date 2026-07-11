@@ -1,12 +1,14 @@
+require("dotenv").config();
+
 module.exports = {
 
   DEGEN: {
-    address: "0x0000000000000000000000000000000000000000",
+    address: process.env.DEGEN_ADDRESS,
     symbol: "DEGEN"
   },
 
   USDC: {
-    address: "0x0000000000000000000000000000000000000000",
+    address: process.env.USDC_ADDRESS,
     symbol: "USDC"
   }
 
