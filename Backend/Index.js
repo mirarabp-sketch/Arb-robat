@@ -53,3 +53,4 @@ app.listen(PORT, () => {
   console.log(`Bot started on port ${PORT}`);
 });
 require("./botRunner");
+require("./mainBot");
