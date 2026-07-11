@@ -54,3 +54,4 @@ app.listen(PORT, () => {
 });
 require("./botRunner");
 require("./mainBot");
+app.use(express.json());
