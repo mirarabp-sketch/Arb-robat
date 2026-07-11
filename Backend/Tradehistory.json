@@ -1,0 +1,51 @@
+const fs = require("fs");
+const path = require("path");
+
+const file = path.join(
+  __dirname,
+  "../database/tradeHistory.json"
+);
+
+
+function saveTrade(data) {
+
+  let history = [];
+
+  if (fs.existsSync(file)) {
+    history = JSON.parse(
+      fs.readFileSync(file, "utf8")
+    );
+  }
+
+
+  history.push({
+    id: Date.now(),
+    time: new Date().toISOString(),
+    ...data
+  });
+
+
+  fs.writeFileSync(
+    file,
+    JSON.stringify(history, null, 2)
+  );
+}
+
+
+
+function getHistory() {
+
+  if (!fs.existsSync(file)) {
+    return [];
+  }
+
+  return JSON.parse(
+    fs.readFileSync(file, "utf8")
+  );
+}
+
+
+module.exports = {
+  saveTrade,
+  getHistory
+};
