@@ -1,32 +1,54 @@
-const fs = require("fs");
-const path = require("path");
+require("dotenv").config();
 
-const filePath = path.join(__dirname, "../database/trades.json");
+const express = require("express");
+const cors = require("cors");
 
-function saveTrade(trade) {
-  let trades = [];
+const config = require("./config");
+const { getPrices } = require("./scanner");
+const { findArbitrage } = require("./arbitrage");
+const { saveTrade, getTrades } = require("./history");
+const { executeTrade } = require("./trader");
 
-  if (fs.existsSync(filePath)) {
-    trades = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  }
+const app = express();
 
-  trades.push({
-    time: new Date().toISOString(),
-    ...trade
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.json({
+    bot: "DEGEN Arbitrage Bot",
+    network: "Base",
+    status: "Running"
   });
+});
 
-  fs.writeFileSync(filePath, JSON.stringify(trades, null, 2));
-}
+app.get("/history", (req, res) => {
+  res.json(getTrades());
+});
 
-function getTrades() {
-  if (!fs.existsSync(filePath)) {
-    return [];
+async function scan() {
+  const prices = await getPrices();
+  const opportunity = findArbitrage(prices);
+
+  if (
+    opportunity &&
+    Number(opportunity.profitPercent) >= config.minProfitPercent
+  ) {
+    const result = await executeTrade(opportunity);
+
+    if (result.success) {
+      saveTrade({
+        ...opportunity,
+        txHash: result.txHash
+      });
+    }
   }
-
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
-module.exports = {
-  saveTrade,
-  getTrades
-};
+setInterval(scan, config.updateInterval);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Bot started on port ${PORT}`);
+});
