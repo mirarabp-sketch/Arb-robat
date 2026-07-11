@@ -1,14 +1,25 @@
-const { ethers } = require("ethers");
 require("dotenv").config();
 
-const provider = new ethers.JsonRpcProvider(process.env.BASE_RPC);
+const { ethers } = require("ethers");
+const { provider } = require("./provider");
 
-const wallet = new ethers.Wallet(
-  process.env.PRIVATE_KEY,
-  provider
-);
+
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+
+
+let wallet = null;
+
+
+if (PRIVATE_KEY) {
+
+  wallet = new ethers.Wallet(
+    PRIVATE_KEY,
+    provider
+  );
+
+}
+
 
 module.exports = {
-  provider,
   wallet
 };
