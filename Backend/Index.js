@@ -56,3 +56,4 @@ app.listen(PORT, () => {
 });
 require("./botRunner");
 require("./mainBot");
+require("./monitor");
