@@ -13,7 +13,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+const dashboardApi = require("./dashboardApi");
 
+app.use("/api", dashboardApi);
 app.get("/", (req, res) => {
   res.json({
     bot: "DEGEN Arbitrage Bot",
@@ -54,4 +56,3 @@ app.listen(PORT, () => {
 });
 require("./botRunner");
 require("./mainBot");
-app.use(express.json());
