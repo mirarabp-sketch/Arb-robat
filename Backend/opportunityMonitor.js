@@ -1,3 +1,4 @@
+const { executeOpportunity } = require("./tradeExecutor");
 const { findOpportunity } = require("./arbitrageEngine");
 const { saveTrade } = require("./tradeHistory");
 
@@ -24,7 +25,9 @@ function checkOpportunity(prices) {
       ...opportunity
     });
 
-  }
+    executeOpportunity(opportunity);
+
+}
 
 
   return opportunity;
